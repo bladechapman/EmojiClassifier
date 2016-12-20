@@ -8,7 +8,8 @@ let labels = [
   "&#x1F60A",
   "&#x1F61E",
   "&#x1F620",
-  "&#x1F622"
+  "&#x1F622",
+  "&#x1F426"
 ];
 
 document.addEventListener("DOMContentLoaded", () => {
