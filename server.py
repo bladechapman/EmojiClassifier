@@ -2,7 +2,7 @@ from flask import Flask, url_for, redirect, request
 from learning import learning_utils
 import json
 
-app = Flask(__name__, static_folder='public')
+app = Flask(__name__, static_path="", static_folder='public')
 
 @app.route("/collect")
 def redirectToCollectPage():
