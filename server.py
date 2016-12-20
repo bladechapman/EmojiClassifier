@@ -18,4 +18,4 @@ def redirectToTestPage():
     return redirect(url_for("static", filename="test.html"), code=302)
 
 if __name__ == "__main__":
-    app.run()
+    app.run("0.0.0.0")
