@@ -1,0 +1,80 @@
+@font-face {
+  font-family: pixelate;
+  src: url("pixelate.TTF");
+}
+
+body {
+  font-family: "pixelate", sans-serif;
+
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#instructions {
+  font-size: 0.5em;
+}
+
+#title {
+  margin: 20px 0 10px 0;
+  font-size: 1.5em;
+}
+
+#subtitle {
+  font-size: 0.76em;
+}
+
+#input {
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 2px;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+#target {
+  font-size: 150px;
+  margin-bottom: -15px;
+}
+
+#controls {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+}
+
+#reset, #send {
+  height: 2em;
+  width: 70px;
+  margin: 20px 30px;
+  text-align: center;
+  line-height: 2.3em;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+#reset {
+  border: 1px solid red;
+  color: red;
+}
+#reset:active {
+  background-color: red;
+  color: white;
+}
+
+#send {
+  border: 1px solid green;
+  color: green;
+}
+#send:active {
+  background-color: green;
+  color: white;
+}
