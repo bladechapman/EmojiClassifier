@@ -1,56 +1,5 @@
 "use strict";
 
-let labels = [
-  "&#x1f608",
-  "&#x1F602",
-  "&#x1F603",
-  "&#x1F609",
-  "&#x1F60A",
-  "&#x1F61E",
-  "&#x1F620",
-  "&#x1F622",
-  "&#x1F426"
-];
-
-document.addEventListener("DOMContentLoaded", () => {
-  let canvas = new BresenhamCanvas(document.getElementById("input"), 50, 50, 5);
-  let label = beginNewSampling(canvas);
-
-  document.addEventListener("keyup", (event) => {
-    if (event.keyCode === 13) {
-      sendData();
-    }
-    else if (event.keyCode === 27) {
-      canvas.reset();
-    }
-  });
-
-  document.getElementById("send").addEventListener("click", sendData);
-  document.getElementById("reset").addEventListener("click", () => {
-    canvas.reset();
-  });
-
-  function sendData() {
-    let param = JSON.stringify({
-      "label": label,
-      "data": canvas.data
-    });
-
-    let testReq = new XMLHttpRequest();
-    testReq.open("POST", "/data");
-    testReq.setRequestHeader("Content-type", "application/json;charset=utf-8");
-    testReq.send(param);
-    label = beginNewSampling(canvas);
-  }
-});
-
-function beginNewSampling(canvas) {
-  let label = labels[parseInt(Math.random() * labels.length)];
-  document.getElementById("target").innerHTML = label;
-  canvas.reset();
-  return label;
-}
-
 class BresenhamCanvas {
   constructor(elem, width, height, pixel_size) {
     this.ctx = elem.getContext("2d");
@@ -229,3 +178,5 @@ class BresenhamCanvas {
     this.elem.removeEventListener("mousemove", this._boundDrawLineFromMouseEvent);
   }
 }
+
+window.BresenhamCanvas = BresenhamCanvas;
