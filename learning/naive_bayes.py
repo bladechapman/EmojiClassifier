@@ -18,7 +18,7 @@ def learn_label_priors(samples):
 def learn_feature_priors(samples):
     # applies laplace smoothing
     features = np.array(list(map(lambda x: x["data"], samples))) + np.ones(len(samples[0]["data"]))
-    return (sum(features) / (len(samples) + 2).tolist()
+    return (sum(features) / (len(samples) + 2).tolist())
 
 def learn_feature_posteriors(samples):
     feature_posteriors = {}
