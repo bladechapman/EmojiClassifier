@@ -24,13 +24,7 @@ def evaluate_sample():
     global training_data
     req_data = json.loads(request.data.decode("utf-8"))
     sample = req_data["data"]
-    likelihoods = naive_bayes.test(sample, training_data)
-    total = sum(likelihoods.values())
-    total = 1 if total == 0 else total
-    for label in likelihoods:
-        likelihoods[label] /= total
-    print (likelihoods)
-    return json.dumps(likelihoods)
+    return naive_bayes.test(sample, training_data)
 
 if __name__ == "__main__":
     app.run("0.0.0.0")

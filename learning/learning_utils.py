@@ -1,4 +1,5 @@
 import json
+from functools import reduce
 
 def save_sample(json_str):
     with open("samples.txt", "a") as f:
@@ -11,3 +12,6 @@ def read_samples():
             sample = json.loads(line.strip("\n"))
             samples.append(sample)
     return samples
+
+def prod(l):
+    return reduce(lambda x, y: x * y, l, 1)

@@ -1,6 +1,8 @@
 from functools import reduce
 import numpy as np
 from . import learning_utils
+from decimal import Decimal
+import operator
 
 def learn_label_priors(samples):
     priors = {}
@@ -12,13 +14,13 @@ def learn_label_priors(samples):
     total = sum(priors.values())
     for label in priors:
         # apply laplace smoothing in denominator
-        priors[label] /= (total + len(priors))
+        priors[label] /= total
     return priors
 
 def learn_feature_priors(samples):
     # applies laplace smoothing
-    features = np.array(list(map(lambda x: x["data"], samples))) + np.ones(len(samples[0]["data"]))
-    return (sum(features) / (len(samples) + 2)).tolist()
+    features = np.array(list(map(lambda x: x["data"], samples)))
+    return ((sum(features) + np.ones(len(samples[0]["data"]))) / (len(samples) + 2)).tolist()
 
 def learn_feature_posteriors(samples):
     feature_posteriors = {}
@@ -41,18 +43,14 @@ def test(sample, training_data):
     label_priors, feature_priors, feature_posteriors = training_data
     ret = {}
     for label in label_priors:
-        posterior = reduce(
-            lambda x, y: x * y,
-            map(lambda x: abs(x[0] - 1 + x[1]),
-                zip(sample, feature_posteriors[label])),
-            1)
-        denom = reduce(
-            lambda x, y: x * y,
-            map(lambda x: abs(x[0] - 1 + x[1]),
-                zip(sample, feature_priors)),
-            1)
-        ret[label] = label_priors[label] * posterior / denom
-    return ret
+        posterior_values = map(lambda x: Decimal(abs(x[0] - 1 + x[1])),
+            zip(sample, feature_posteriors[label]))
+        denom_values = map(lambda x: Decimal(abs(x[0] - 1 + x[1])),
+            zip(sample, feature_priors))
+
+        ret[label] = learning_utils.prod(posterior_values)
+
+    return max(ret.keys(), key=lambda x: ret[x])
 
 if __name__ == "__main__":
     import json
