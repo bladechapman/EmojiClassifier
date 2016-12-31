@@ -1,6 +1,8 @@
 samples.txt
 samples_loc.txt
 samples_serv.txt
-nb_training_data.json
+nb_training_params.json
+nb_cm_serv.txt
+nb_cm_loc.txt
 *.pyc
 __pycache__

@@ -39,15 +39,14 @@ def train(samples):
     feature_posteriors = learn_feature_posteriors(samples)
     return (label_priors, feature_priors, feature_posteriors)
 
-def test(sample, training_data):
-    label_priors, feature_priors, feature_posteriors = training_data
+def test(sample, training_params):
+    label_priors, feature_priors, feature_posteriors = training_params
     ret = {}
     for label in label_priors:
         posterior_values = map(lambda x: Decimal(abs(x[0] - 1 + x[1])),
             zip(sample, feature_posteriors[label]))
         denom_values = map(lambda x: Decimal(abs(x[0] - 1 + x[1])),
             zip(sample, feature_priors))
-
         ret[label] = learning_utils.prod(posterior_values)
 
     return max(ret.keys(), key=lambda x: ret[x])
@@ -55,6 +54,6 @@ def test(sample, training_data):
 if __name__ == "__main__":
     import json
     data = learning_utils.read_samples()
-    training_data = train(data)
-    with open("learning/nb_training_data.json", "w") as f:
-        f.write(json.dumps(training_data))
+    training_params = train(data)
+    with open("learning/nb_training_params.json", "w") as f:
+        f.write(json.dumps(training_params))
