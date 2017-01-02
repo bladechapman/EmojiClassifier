@@ -23,7 +23,9 @@ def redirect_to_test_page():
 def evaluate_sample():
     global training_data
     req_data = json.loads(request.data.decode("utf-8"))
-    sample = req_data["data"]
+    req_data["label"] = None
+    normalized_sample = learning_utils.normalize_sample(req_data)
+    sample = normalized_sample["data"]
     return naive_bayes.test(sample, training_data)
 
 if __name__ == "__main__":
