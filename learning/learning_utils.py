@@ -3,8 +3,10 @@ from functools import reduce
 from learning import naive_bayes
 
 def save_sample(json_str):
+    sample = json.loads(json_str)
+    normalized_sample = normalize_sample(sample)
     with open("samples.txt", "a") as f:
-        f.write(json_str + "\n")
+        f.write(json.dumps(normalized_sample) + "\n")
 
 def read_samples():
     samples = []
@@ -48,6 +50,10 @@ def five_fold_cross_validate(learning_module):
             actual_label = test_datum["label"]
             guessed_label = learning_module.test(test_datum["data"], training_params)
             confusion_values[actual_label][guessed_label] += 1
+    for label in confusion_values:
+        total = sum(confusion_values[label].values())
+        for sublabel in confusion_values[label]:
+            confusion_values[label][sublabel] /= total
     return confusion_values
 
 def normalize_sample(sample):
@@ -85,10 +91,10 @@ def normalize_sample(sample):
             mapped_y = int(new_height / dimension * y) + min_y
             normalized_sample[y][x] = sd[mapped_y][mapped_x]
 
-    return {
-        "label": sample["label"],
+    return convert_sample_to_1d({
+        "label": s["label"],
         "data": normalized_sample
-    }
+    })
 
 if __name__ == "__main__":
     confusion_values = five_fold_cross_validate(naive_bayes)
