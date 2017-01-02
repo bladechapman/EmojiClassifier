@@ -85,8 +85,10 @@ def normalize_sample(sample):
             mapped_y = int(new_height / dimension * y) + min_y
             normalized_sample[y][x] = sd[mapped_y][mapped_x]
 
-    return normalized_sample
-
+    return {
+        "label": sample["label"],
+        "data": normalized_sample
+    }
 
 if __name__ == "__main__":
     confusion_values = five_fold_cross_validate(naive_bayes)
