@@ -1,10 +1,11 @@
 from flask import Flask, url_for, redirect, request
-from learning import learning_utils, naive_bayes
+from learning import learning_utils, naive_bayes, sample
 import json
 
 app = Flask(__name__, static_path="", static_folder='public')
-data = learning_utils.read_samples()
-training_data = naive_bayes.train(data)
+samples = learning_utils.read_samples()
+nb_model = naive_bayes.NaiveBayes()
+nb_model.train(samples)
 
 @app.route("/collect")
 def redirect_to_collect_page():
@@ -12,7 +13,9 @@ def redirect_to_collect_page():
 
 @app.route("/data", methods=["POST"])
 def record_data():
-    learning_utils.save_sample(request.data.decode("utf-8"))
+    s = sample.Sample(json_str=request.data.decode("utf-8"))
+    s.normalize()
+    s.save()
     return "received"
 
 @app.route("/test")
@@ -21,12 +24,11 @@ def redirect_to_test_page():
 
 @app.route("/evaluate", methods=["POST"])
 def evaluate_sample():
-    global training_data
     req_data = json.loads(request.data.decode("utf-8"))
     req_data["label"] = None
-    normalized_sample = learning_utils.normalize_sample(req_data)
-    sample = normalized_sample["data"]
-    return naive_bayes.test(sample, training_data)
+    s = sample.Sample(req_data)
+    s.normalize()
+    return naive_bayes.test(s.data)
 
 if __name__ == "__main__":
     app.run("0.0.0.0")

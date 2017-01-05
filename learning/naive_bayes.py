@@ -4,56 +4,111 @@ from . import learning_utils
 from decimal import Decimal
 import operator
 
-def learn_label_priors(samples):
-    priors = {}
-    for sample in samples:
-        if sample["label"] not in priors:
-            # initialize to 1 for laplace smoothing in numerator
-            priors[sample["label"]] = 1
-        priors[sample["label"]] += 1
-    total = sum(priors.values())
-    for label in priors:
-        # apply laplace smoothing in denominator
-        priors[label] /= total
-    return priors
+class NaiveBayes():
+    def __init__(self):
+        """
+        Model must be trained before data can be tested against it.
+        """
+        self._label_priors = None
+        self._feature_priors = None
+        self._feature_posteriors = None
 
-def learn_feature_priors(samples):
-    # applies laplace smoothing
-    features = np.array(list(map(lambda x: x["data"], samples)))
-    return ((sum(features) + np.ones(len(samples[0]["data"]))) / (len(samples) + 2)).tolist()
+    def train(self, samples):
+        """
+        Trains the Naive Bayes model using a given array of Sample objects
+        :param samples: An array of Sample objects.
+        """
+        self._label_priors = NaiveBayes.learn_label_priors(samples)
+        self._feature_priors = NaiveBayes.learn_feature_priors(samples)
+        self._feature_posteriors = NaiveBayes.learn_feature_posteriors(samples)
 
-def learn_feature_posteriors(samples):
-    feature_posteriors = {}
-    labels = set()
-    for sample in samples:
-        labels.add(sample["label"])
-    for label in labels:
-        relevant_samples = list(filter(lambda x: x["label"] == label, samples))
-        # laplace smoothing is applied in learn_feature_priors
-        feature_posteriors[label] = learn_feature_priors(relevant_samples)
-    return feature_posteriors
+    def test(self, data):
+        """
+        Tests data against the learned model
+        :param data: An array of binary values
+        :return: label
+        """
+        if self._label_priors is None or \
+            self._feature_priors is None or \
+            self._feature_posteriors is None:
+            raise Exception("Model not trained yet")
 
-def train(samples):
-    label_priors = learn_label_priors(samples)
-    feature_priors = learn_feature_priors(samples)
-    feature_posteriors = learn_feature_posteriors(samples)
-    return (label_priors, feature_priors, feature_posteriors)
+        ret = {}
+        for label in self.label_priors:
+            posterior_values = map(lambda x: Decimal(abs(x[0] - 1 + x[1])),
+                zip(data, self.feature_posteriors[label]))
+            denom_values = map(lambda x: Decimal(abs(x[0] - 1 + x[1])),
+                zip(data, self.feature_priors))
+            ret[label] = learning_utils.prod(posterior_values)
+        return max(ret.keys(), key=lambda x: ret[x])
 
-def test(sample, training_params):
-    label_priors, feature_priors, feature_posteriors = training_params
-    ret = {}
-    for label in label_priors:
-        posterior_values = map(lambda x: Decimal(abs(x[0] - 1 + x[1])),
-            zip(sample, feature_posteriors[label]))
-        denom_values = map(lambda x: Decimal(abs(x[0] - 1 + x[1])),
-            zip(sample, feature_priors))
-        ret[label] = learning_utils.prod(posterior_values)
+    @property
+    def label_priors(self):
+        """
+        Read only
+        """
+        return self._label_priors
 
-    return max(ret.keys(), key=lambda x: ret[x])
+    @property
+    def feature_priors(self):
+        """
+        Read only
+        """
+        return self._feature_priors
 
-if __name__ == "__main__":
-    import json
-    data = learning_utils.read_samples()
-    training_params = train(data)
-    with open("learning/nb_training_params.json", "w") as f:
-        f.write(json.dumps(training_params))
+    @property
+    def feature_posteriors(self):
+        """
+        Read only
+        """
+        return self._feature_posteriors
+
+    def learn_label_priors(samples):
+        """
+        Values is add-one smoothed
+        :param samples: An array of Sample objects
+        :return: label priors
+        """
+        priors = {}
+        for sample in samples:
+            if sample.label not in priors:
+                # initialize to 1 for laplace smoothing in numerator
+                priors[sample.label] = 1
+            priors[sample.label] += 1
+        total = sum(priors.values())
+        for label in priors:
+            # apply laplace smoothing in denominator
+            priors[label] /= total
+        return priors
+
+    def learn_feature_priors(samples):
+        """
+        Values are add-one smoothed
+        :param samples: An array of Sample objects
+        :return: feature priors
+        """
+        # applies laplace smoothing
+        sample_length = len(samples[0].data)
+        features = np.array(list(map(lambda x: x.data, samples)))
+        return ((sum(features) + np.ones(sample_length)) / (len(samples) + 2)).tolist()
+
+    def learn_feature_posteriors(samples):
+        """
+        Values are add-one smoothed
+        :param samples: An array of Sample objects
+        :return: feature posteriors indexed by label
+        """
+        feature_posteriors = {}
+        labels = set(map(lambda x: x.label, samples))
+        for label in labels:
+            relevant_samples = list(filter(lambda x: x.label == label, samples))
+            # laplace smoothing is applied in learn_feature_priors
+            feature_posteriors[label] = NaiveBayes.learn_feature_priors(relevant_samples)
+        return feature_posteriors
+
+# if __name__ == "__main__":
+#     import json
+#     data = learning_utils.read_samples()
+#     training_params = train(data)
+#     with open("learning/nb_training_params.json", "w") as f:
+#         f.write(json.dumps(training_params))
