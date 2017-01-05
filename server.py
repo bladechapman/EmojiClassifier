@@ -25,10 +25,9 @@ def redirect_to_test_page():
 @app.route("/evaluate", methods=["POST"])
 def evaluate_sample():
     req_data = json.loads(request.data.decode("utf-8"))
-    req_data["label"] = None
-    s = sample.Sample(req_data)
+    s = sample.Sample(data=req_data["data"], label="_")
     s.normalize()
-    return naive_bayes.test(s.data)
+    return nb_model.test(s.data)
 
 if __name__ == "__main__":
     app.run("0.0.0.0")
